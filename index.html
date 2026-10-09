@@ -82,6 +82,37 @@
   .start textarea:focus{border-color:var(--ink)}
   .start__msg{font-size:13px;color:var(--pink-ink);min-height:20px;margin-top:10px}
   .start__actions{display:flex;gap:10px;align-items:center}
+  .start__steps{margin:0 0 22px;padding:0;list-style:none;counter-reset:s;max-width:62ch}
+  .start__steps li{counter-increment:s;position:relative;padding-left:30px;margin-bottom:7px;
+    font-size:14px;color:#3A362E}
+  .start__steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:19px;height:19px;
+    border-radius:50%;background:var(--ink);color:#fff;font-family:var(--mono);font-size:10.5px;
+    display:flex;align-items:center;justify-content:center}
+  .start__steps b{font-weight:600;color:var(--ink)}
+
+  .backups{margin-top:26px;border-top:1px solid var(--rule);padding-top:20px}
+  .backups__title{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 6px}
+  .backups__sub{font-size:13px;color:#4A463E;margin:0 0 14px;max-width:62ch}
+  .backups__list{display:flex;flex-direction:column;gap:8px}
+  .backup{display:flex;align-items:center;gap:14px;border:1px solid var(--rule);border-radius:4px;
+    padding:10px 12px;background:var(--panel)}
+  .backup__date{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
+  .backup__label{font-size:13px;flex:1;min-width:0}
+  .backup__label span{display:block;color:var(--muted);font-size:12px}
+
+  /* ---------- guide ---------- */
+  .guide h3{font-family:var(--serif);font-size:19px;margin:26px 0 8px;font-weight:600}
+  .guide h3:first-child{margin-top:0}
+  .guide p{margin:0 0 10px;font-size:14px;line-height:1.6;max-width:66ch}
+  .guide ol,.guide ul{margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.6;max-width:66ch}
+  .guide li{margin-bottom:5px}
+  .guide b{font-weight:600}
+  .guide code{font-family:var(--mono);font-size:12px;background:var(--paper);padding:1px 5px;border-radius:3px}
+  .guide__flow{margin:4px 0 18px;width:100%;height:auto}
+  .guide__note{background:var(--yellow);color:var(--yellow-ink);border-radius:4px;padding:11px 14px;
+    font-size:13px;line-height:1.55;margin:0 0 10px;max-width:66ch}
+  .modal--wide{width:min(860px,100%)}
 
   /* ---------- missing sections notice ---------- */
   .notice{margin:16px 20px 0;padding:12px 14px;border-radius:4px;background:var(--yellow);
@@ -212,9 +243,9 @@
   <header class="topbar">
     <span class="wordmark">Czech<i></i>Design</span>
     <span class="toolname">Editor homepage</span>
+    <button class="btn btn--ghost" id="btnGuide">Návod</button>
     <span id="topActions" class="topactions" hidden>
       <button class="btn" id="btnImportHTML">Načíst jiné HTML</button>
-      <button class="btn" id="btnDownload">Stáhnout HTML</button>
       <button class="btn btn--primary" id="btnCopy">Kopírovat HTML</button>
     </span>
     <input type="file" id="fileHtml" accept="text/html,.html,.htm,.txt" hidden />
@@ -224,12 +255,22 @@
     <div class="start__card">
       <p class="start__eyebrow">Krok 1 ze 2</p>
       <h1 class="start__title">Vložte aktuální HTML homepage</h1>
-      <p class="start__sub">Editor začíná vždy tím, co je právě na webu. Zkopírujte HTML homepage z administrace, vložte ho sem a všechna pole se z něj předvyplní.</p>
-      <textarea id="startIn" placeholder="Sem vložte HTML…" spellcheck="false"></textarea>
+      <p class="start__sub">Editor začíná vždy tím, co je právě na webu, vlastní obsah si nedrží.</p>
+      <ol class="start__steps">
+        <li>V administraci jděte do <b>Vzhled a obsah</b> → <b>Titulní strana</b> → <b>Nástroje</b> → <b>Zdrojový kód</b>.</li>
+        <li>Zkopírujte celý kód, úplně všechno.</li>
+        <li>Vložte ho sem dolů a dejte Načíst obsah.</li>
+      </ol>
+      <textarea id="startIn" placeholder="Sem vložte celý zdrojový kód…" spellcheck="false"></textarea>
       <div class="start__msg" id="startMsg"></div>
       <div class="start__actions">
-        <button class="btn" id="btnStartFile">Vybrat soubor…</button>
         <button class="btn btn--primary" id="btnStartParse">Načíst obsah</button>
+        <button class="btn btn--ghost" id="btnStartBackup">Nemáte kód po ruce?</button>
+      </div>
+      <div class="backups" id="backups" hidden>
+        <p class="backups__title">Uložené zálohy</p>
+        <p class="backups__sub">Starší verze homepage uložené v tomhle nástroji. Použijte je, když potřebujete obnovit dřívější stav nebo si jen něco vyzkoušet.</p>
+        <div id="backupList" class="backups__list"></div>
       </div>
     </div>
   </div>
@@ -272,6 +313,76 @@
       <span class="spacer"></span>
       <button class="btn btn--ghost" id="btnCancel">Zrušit</button>
       <button class="btn btn--primary" id="btnParse">Načíst obsah</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="guideOverlay">
+  <div class="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal__head">
+      <h2 class="modal__title" id="guideTitle">Návod</h2>
+      <p class="modal__sub">Jak editor zapadá do práce s homepage, co hlídá a co dělat, když se něco pokazí.</p>
+    </div>
+    <div class="modal__body guide">
+
+      <h3>Jak to celé funguje</h3>
+      <p>Editor nic nepublikuje a nikam se nepřipojuje. Je to mezikrok: vezme kód z administrace, rozebere ho na pole, a když dopíšete, složí ho zpět. Publikujete pořád vy, ručně, v administraci.</p>
+      <svg class="guide__flow" viewBox="0 0 760 108" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma: z administrace do editoru a zpět do administrace">
+        <defs>
+          <marker id="gArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#14130F"/>
+          </marker>
+        </defs>
+        <rect x="1" y="26" width="212" height="56" rx="4" fill="#F1EDE4" stroke="#E2DCCF"/>
+        <text x="107" y="49" text-anchor="middle" font-family="Archivo,sans-serif" font-size="13" font-weight="600" fill="#14130F">Administrace</text>
+        <text x="107" y="67" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" fill="#7A756B">Zdrojový kód → kopírovat</text>
+        <line x1="221" y1="54" x2="266" y2="54" stroke="#14130F" stroke-width="1.5" marker-end="url(#gArrow)"/>
+        <rect x="274" y="14" width="212" height="80" rx="4" fill="#14130F"/>
+        <text x="380" y="43" text-anchor="middle" font-family="Archivo,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Editor</text>
+        <text x="380" y="61" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" fill="#BDB8AC">upravit · náhled · kontrola</text>
+        <text x="380" y="78" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" fill="#BDB8AC">Kopírovat HTML</text>
+        <line x1="494" y1="54" x2="539" y2="54" stroke="#14130F" stroke-width="1.5" marker-end="url(#gArrow)"/>
+        <rect x="547" y="26" width="212" height="56" rx="4" fill="#F1EDE4" stroke="#E2DCCF"/>
+        <text x="653" y="49" text-anchor="middle" font-family="Archivo,sans-serif" font-size="13" font-weight="600" fill="#14130F">Administrace</text>
+        <text x="653" y="67" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" fill="#7A756B">vložit zpět → uložit</text>
+      </svg>
+
+      <h3>Kde v administraci najdete kód</h3>
+      <p><b>Vzhled a obsah</b> → <b>Titulní strana</b> → <b>Nástroje</b> → <b>Zdrojový kód</b>. Označte celý obsah okna, zkopírujte a vložte do editoru. Vždy celý, ne jen kus, který chcete měnit.</p>
+
+      <h3>Úprava obsahu</h3>
+      <ul>
+        <li>Vlevo je formulář rozdělený na sekce. U každé je uvedená CSS třída, aby bylo jasné, které části stránky odpovídá.</li>
+        <li>Karty, záložky a designéři jsou sbalení. Kliknutím na řádek je rozbalíte. Dají se přidávat, mazat, duplikovat a přesouvat šipkami.</li>
+        <li>Vpravo přepínáte mezi <b>Náhledem</b>, hotovým <b>HTML</b> a <b>Kontrolou</b>.</li>
+        <li>Náhled je orientační, ne přesná kopie webu. Záložky v něm jdou přepínat. Widgety produktů se zobrazí jako šedý obdélník, na webu se načtou normálně.</li>
+      </ul>
+
+      <h3>Co editor hlídá</h3>
+      <p>Záložka Kontrola projde obsah ještě před vložením zpět. Hlásí chybějící a duplicitní alt popisky, prázdné cesty k obrázkům, odkazy bez lomítka na začátku nebo na konci, nečíselná ID widgetů a kotvy záložek, které se opakují.</p>
+      <p>Červené <b>Chyba</b> opravte vždy. Žluté <b>Ověřit</b> je upozornění, občas je v pořádku ho ignorovat.</p>
+
+      <h3>Vložení zpět na web</h3>
+      <ol>
+        <li>Dejte <b>Kopírovat HTML</b>.</li>
+        <li>V administraci otevřete stejné okno se zdrojovým kódem.</li>
+        <li>Označte celý starý obsah, přepište ho vloženým kódem a uložte.</li>
+      </ol>
+
+      <h3>Jedna věc, na kterou pozor</h3>
+      <p class="guide__note">Editor vygeneruje jen ty sekce, které byly ve vloženém kódu. Když načtete jen výřez, dostanete zpátky jen ten výřez. Pokud nějaká sekce chybí, upozorní na to žlutý pruh nad formulářem. Než kód vložíte zpět, mrkněte, jestli tam ten pruh není.</p>
+
+      <h3>Zálohy</h3>
+      <p>Na úvodní obrazovce je pod tlačítkem <b>Nemáte kód po ruce?</b> seznam uložených verzí homepage. Když se na webu něco rozsype, načtěte zálohu, zkopírujte HTML a vložte ho v administraci zpět.</p>
+      <p>Zálohy přibývají ručně. Když budete chtít uložit aktuální stav jako novou zálohu, řekněte si o to.</p>
+
+      <h3>Rozpracovaná práce</h3>
+      <p>Editor si nic neukládá. Zavřením karty se obsah ztratí, takže hotový kód rovnou kopírujte do administrace.</p>
+
+    </div>
+    <div class="modal__foot">
+      <span class="spacer"></span>
+      <button class="btn btn--primary" id="btnGuideClose">Zavřít</button>
     </div>
   </div>
 </div>
@@ -1196,15 +1307,6 @@ function toast(msg){
   clearTimeout(t._t);
   t._t = setTimeout(function(){ t.dataset.show = "false"; }, 3200);
 }
-function download(name, text, type){
-  const blob = new Blob([text], {type:type});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
-}
-
 document.querySelectorAll(".tab").forEach(function(tab){
   tab.addEventListener("click", function(){
     document.querySelectorAll(".tab").forEach(function(t){ t.setAttribute("aria-selected", String(t === tab)); });
@@ -1229,10 +1331,6 @@ document.getElementById("btnCopy").onclick = function(){
   } else fallback();
 };
 
-document.getElementById("btnDownload").onclick = function(){
-  download("homepage.html", currentHTML, "text/html;charset=utf-8");
-  toast("Soubor homepage.html stažen");
-};
 /* --- načtení HTML: úvodní obrazovka i opakovaný import --- */
 const overlay   = document.getElementById("overlay");
 const htmlIn    = document.getElementById("htmlIn");
@@ -1271,7 +1369,6 @@ function readFileInto(target, msgEl){
 }
 
 /* úvodní obrazovka */
-document.getElementById("btnStartFile").onclick = function(){ readFileInto(startIn, startMsg); };
 document.getElementById("btnStartParse").onclick = function(){
   if(importFrom(startIn.value, startMsg)) startIn.value = "";
 };
@@ -1287,9 +1384,71 @@ function closeModal(){ overlay.dataset.open = "false"; }
 document.getElementById("btnImportHTML").onclick = openModal;
 document.getElementById("btnCancel").onclick = closeModal;
 overlay.addEventListener("click", function(e){ if(e.target === overlay) closeModal(); });
+/* návod */
+const guideOverlay = document.getElementById("guideOverlay");
+function closeGuide(){ guideOverlay.dataset.open = "false"; }
+document.getElementById("btnGuide").onclick = function(){ guideOverlay.dataset.open = "true"; };
+document.getElementById("btnGuideClose").onclick = closeGuide;
+guideOverlay.addEventListener("click", function(e){ if(e.target === guideOverlay) closeGuide(); });
+
 document.addEventListener("keydown", function(e){
-  if(e.key === "Escape" && overlay.dataset.open === "true") closeModal();
+  if(e.key !== "Escape") return;
+  if(guideOverlay.dataset.open === "true") closeGuide();
+  else if(overlay.dataset.open === "true") closeModal();
 });
+
+/* zálohy — starší verze homepage uložené v repozitáři */
+const backupsBox = document.getElementById("backups");
+let backupsLoaded = false;
+
+document.getElementById("btnStartBackup").onclick = function(){
+  const opening = backupsBox.hidden;
+  backupsBox.hidden = !opening;
+  if(opening) loadBackupList();
+};
+
+function loadBackupList(){
+  if(backupsLoaded) return;
+  backupsLoaded = true;
+  const list = document.getElementById("backupList");
+  list.textContent = "Načítám…";
+  fetch("zalohy/index.json", {cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+    .then(function(items){
+      list.innerHTML = "";
+      if(!items.length){ list.appendChild(el("p", "backups__sub", "Zatím tu žádná záloha není.")); return; }
+      items.forEach(function(it){ list.appendChild(backupRow(it)); });
+    })
+    .catch(function(){
+      backupsLoaded = false;
+      list.innerHTML = "";
+      list.appendChild(el("p", "backups__sub",
+        "Seznam záloh se nepodařilo načíst. Zálohy fungují jen na adrese corrivati.github.io, ne při otevření souboru z disku."));
+    });
+}
+
+function backupRow(it){
+  const row = el("div", "backup");
+  row.appendChild(el("span", "backup__date", it.date || ""));
+  const lab = el("div", "backup__label", it.label || it.file);
+  if(it.note) lab.appendChild(el("span", null, it.note));
+  row.appendChild(lab);
+  const b = el("button", "btn", "Načíst");
+  b.onclick = function(){
+    b.disabled = true; b.textContent = "Načítám…";
+    fetch("zalohy/" + it.file, {cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.text(); })
+      .then(function(html){
+        if(!importFrom(html, startMsg)){ b.disabled = false; b.textContent = "Načíst"; }
+      })
+      .catch(function(){
+        startMsg.textContent = "Zálohu se nepodařilo načíst.";
+        b.disabled = false; b.textContent = "Načíst";
+      });
+  };
+  row.appendChild(b);
+  return row;
+}
 
 document.getElementById("btnPickHtml").onclick = function(){ readFileInto(htmlIn, modalMsg); };
 document.getElementById("btnParse").onclick = function(){

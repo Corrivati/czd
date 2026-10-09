@@ -7,8 +7,9 @@ hotové HTML k vložení do administrace.
 
 ## Co umí
 
-- Začíná se vždy vložením aktuálního HTML z administrace. Editor nemá
-  žádný vlastní výchozí obsah, pracuje jen s tím, co mu dáte
+- Začíná se vždy vložením aktuálního HTML z administrace
+  (**Vzhled a obsah → Titulní strana → Nástroje → Zdrojový kód**). Editor
+  nemá žádný vlastní výchozí obsah, pracuje jen s tím, co mu dáte
 - Sekce: úvodní text, Oblíbené kategorie, Inspirace, Kampaně, Snoubení,
   Designéři a značky, O nás. Vypíše se jen to, co bylo ve vloženém kódu,
   chybějící sekce nástroj vypíše jako upozornění
@@ -18,7 +19,24 @@ hotové HTML k vložení do administrace.
   kotvy
 - Karty a designéři jsou sbalení, dají se přidávat, mazat, duplikovat
   a přesouvat
-- Export: Kopírovat HTML, Stáhnout HTML
+- Export: Kopírovat HTML
+- Vestavěný **Návod** a **zálohy** starších verzí homepage
+
+## Zálohy
+
+Složka `zalohy/` drží starší verze homepage. Na úvodní obrazovce se
+nabídnou pod tlačítkem „Nemáte kód po ruce?“.
+
+Novou zálohu přidáte tak, že do `zalohy/` commitnete HTML soubor
+a doplníte záznam do `zalohy/index.json`:
+
+```json
+{ "file": "2026-11-02-homepage.html", "date": "2. 11. 2026",
+  "label": "Homepage po vánoční kampani", "note": "Krátký popis" }
+```
+
+Úplnou historii nese i samotný git, zálohy jsou jen to, co má být po ruce
+přímo v nástroji.
 
 ## Práce s obsahem
 
