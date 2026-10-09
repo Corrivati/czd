@@ -35,8 +35,16 @@ a doplníte záznam do `zalohy/index.json`:
   "label": "Homepage po vánoční kampani", "note": "Krátký popis" }
 ```
 
-Úplnou historii nese i samotný git, zálohy jsou jen to, co má být po ruce
-přímo v nástroji.
+Zálohu zakládej při každé vyvíjené aktualizaci homepage, ať poslední
+položka v seznamu odpovídá poslednímu nasazenému stavu. Úplnou historii
+nese i samotný git, složka `zalohy/` je jen to, co má být po ruce přímo
+v nástroji.
+
+## Obrázky v návodu
+
+Screenshoty pro vestavěný Návod jsou v `navod/`. Odkazují se z nich
+relativní cesty v `index.html`, takže stačí přidat soubor a doplnit
+`<figure class="shot">` do příslušné sekce návodu.
 
 ## Práce s obsahem
 

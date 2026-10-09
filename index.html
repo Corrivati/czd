@@ -112,6 +112,13 @@
   .guide__flow{margin:4px 0 18px;width:100%;height:auto}
   .guide__note{background:var(--yellow);color:var(--yellow-ink);border-radius:4px;padding:11px 14px;
     font-size:13px;line-height:1.55;margin:0 0 10px;max-width:66ch}
+  .shots{display:flex;flex-wrap:wrap;gap:16px;margin:14px 0 18px}
+  .shot{margin:0;flex:0 1 auto;max-width:100%}
+  .shot img{display:block;max-width:100%;height:auto;border:1px solid var(--rule);border-radius:4px;
+    background:var(--panel)}
+  .shot--wide{flex:1 1 100%}
+  .shot figcaption{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--muted);
+    margin-top:7px}
   .modal--wide{width:min(860px,100%)}
 
   /* ---------- missing sections notice ---------- */
@@ -348,7 +355,17 @@
       </svg>
 
       <h3>Kde v administraci najdete kód</h3>
-      <p><b>Vzhled a obsah</b> → <b>Titulní strana</b> → <b>Nástroje</b> → <b>Zdrojový kód</b>. Označte celý obsah okna, zkopírujte a vložte do editoru. Vždy celý, ne jen kus, který chcete měnit.</p>
+      <p>V Shoptetu jděte do <b>Vzhled a obsah</b> → <b>Titulní strana</b>, pak nahoře v liště <b>Nástroje</b> → <b>Zdrojový kód</b>. Označte celý obsah okna, zkopírujte a vložte do editoru. Vždy celý, ne jen kus, který chcete měnit.</p>
+      <div class="shots">
+        <figure class="shot">
+          <img src="navod/shoptet-1-titulni-strana.png" alt="Levé menu Shoptetu s rozbalenou položkou Vzhled a obsah a vybranou Titulní stranou" loading="lazy" />
+          <figcaption>1. Vzhled a obsah → Titulní strana</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="navod/shoptet-2-zdrojovy-kod.png" alt="Rozbalená nabídka Nástroje s položkou Zdrojový kód" loading="lazy" />
+          <figcaption>2. Nástroje → Zdrojový kód</figcaption>
+        </figure>
+      </div>
 
       <h3>Úprava obsahu</h3>
       <ul>
@@ -374,7 +391,7 @@
 
       <h3>Zálohy</h3>
       <p>Na úvodní obrazovce je pod tlačítkem <b>Nemáte kód po ruce?</b> seznam uložených verzí homepage. Když se na webu něco rozsype, načtěte zálohu, zkopírujte HTML a vložte ho v administraci zpět.</p>
-      <p>Zálohy přibývají ručně. Když budete chtít uložit aktuální stav jako novou zálohu, řekněte si o to.</p>
+      <p>Nová záloha se zakládá vždy, když se vyvíjí aktualizovaná verze homepage, takže poslední položka v seznamu odpovídá poslednímu nasazenému stavu. Pokud potřebujete zálohu doplnit, obnovit starší verzi nebo si nejste jistí, kterou vzít, ozvěte se Márovi.</p>
 
       <h3>Rozpracovaná práce</h3>
       <p>Editor si nic neukládá. Zavřením karty se obsah ztratí, takže hotový kód rovnou kopírujte do administrace.</p>
