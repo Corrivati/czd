@@ -123,6 +123,17 @@
   .shot img{display:block;max-width:100%;height:auto;border:1px solid var(--rule);border-radius:4px;
     background:var(--panel)}
   .shot--wide{flex:1 1 100%}
+  .urlmap{margin:4px 0 16px;padding:14px 16px;background:var(--paper);border-radius:4px;max-width:66ch}
+  .urlmap__line{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.9;word-break:break-all}
+  .urlmap__fix{color:var(--muted)}
+  .urlmap__a{background:var(--yellow);color:var(--ink);padding:2px 4px;border-radius:2px;font-weight:700}
+  .urlmap__b{background:var(--pink);color:var(--ink);padding:2px 4px;border-radius:2px;font-weight:700}
+  .urlmap__legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:11px 0 0;font-size:11.5px;color:var(--muted)}
+  .urlmap__legend span{display:flex;align-items:center;gap:6px}
+  .urlmap__key{width:11px;height:11px;border-radius:2px;flex:none}
+  .urlmap__key--fix{background:var(--rule)}
+  .urlmap__key--a{background:var(--yellow)}
+  .urlmap__key--b{background:var(--pink)}
   .shot figcaption{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);
     margin-top:7px}
   .modal--wide{width:min(860px,100%)}
@@ -422,8 +433,53 @@
         <li>Vlevo je formulář rozdělený na sekce. U každé je uvedená CSS třída, aby bylo jasné, které části stránky odpovídá.</li>
         <li>Karty, záložky a designéři jsou sbalení. Kliknutím na řádek je rozbalíte. Dají se přidávat, mazat, duplikovat a přesouvat šipkami.</li>
         <li>Vpravo přepínáte mezi <b>Náhledem</b>, hotovým <b>HTML</b> a <b>Kontrolou</b>.</li>
+        <li>Obrázek se nemění nahráním do editoru, ale přepsáním cesty k souboru. Jak na to, je hned v další části.</li>
         <li>Náhled je orientační, ne přesná kopie webu. Záložky v něm jdou přepínat. Widgety produktů se zobrazí jako šedý obdélník, na webu se načtou normálně.</li>
       </ul>
+
+      <h3>Výměna obrázků</h3>
+      <p>Obrázek se do editoru nenahrává. Nejdřív soubor nahrajete do administrace a tady v editoru pak jen přepíšete cestu k němu. Postup je pokaždé stejný.</p>
+
+      <p><b>1. Otevřete správce souborů.</b> V administraci jděte do <b>Vzhled a obsah</b> → <b>Správce souborů</b>.</p>
+      <div class="shots">
+        <figure class="shot">
+          <img src="navod/shoptet-3-spravce-souboru.png" alt="Menu administrace s vybranou položkou Správce souborů" loading="lazy" />
+          <figcaption>Vzhled a obsah → Správce souborů</figcaption>
+        </figure>
+      </div>
+
+      <p><b>2. Otevřete složku hp-redesign.</b> Všechny obrázky homepage jsou v ní. Do jiných složek nic nedávejte.</p>
+      <div class="shots">
+        <figure class="shot">
+          <img src="navod/shoptet-4-hp-redesign.png" alt="Dlaždice složky hp-redesign ve správci souborů" loading="lazy" />
+          <figcaption>Složka hp-redesign</figcaption>
+        </figure>
+      </div>
+
+      <p><b>3. Nahrajte obrázek do správné podsložky.</b> Uvnitř jsou podsložky podle sekcí: <b>banners</b>, <b>campaigns</b>, <b>designers</b>, <b>header</b>, <b>inspiration</b>. Obrázky kategorií, prstenů a fotka k sekci O nás leží rovnou v hp-redesign, bez podsložky. Nový obrázek dejte tam, kde už leží ten, který nahrazujete.</p>
+      <div class="shots">
+        <figure class="shot shot--wide">
+          <img src="navod/shoptet-5-podslozky.jpg" alt="Obsah složky hp-redesign: podsložky banners, campaigns, designers, header, inspiration a jednotlivé obrázky" loading="lazy" />
+          <figcaption>Uvnitř hp-redesign: nahoře podsložky, pod nimi jednotlivé obrázky</figcaption>
+        </figure>
+      </div>
+
+      <p class="guide__note"><b>Než soubor nahrajete.</b> Dejte mu stejné rozměry, jaké má obrázek, který nahrazujete, jinak se vám rozhodí rozložení stránky. Velikost držte do 100 kB. Název pište bez mezer a bez diakritiky, slova spojujte pomlčkou: <b>kategorie-6.jpg</b> ano, <b>Zlaté šperky.jpg</b> ne.</p>
+
+      <p><b>4. Přepište cestu v editoru.</b> V poli <b>Obrázek</b> je cesta k souboru. Měníte na ní jen dvě věci, podsložku a název souboru. Začátek nechte přesně tak, jak je.</p>
+      <div class="urlmap">
+        <p class="urlmap__line"><span class="urlmap__fix">/user/documents/upload/hp-redesign/</span><span class="urlmap__a">inspiration</span><span class="urlmap__fix">/</span><span class="urlmap__b">stolovani.jpg</span></p>
+        <p class="urlmap__legend">
+          <span><i class="urlmap__key urlmap__key--fix"></i>nechte být</span>
+          <span><i class="urlmap__key urlmap__key--a"></i>podsložka</span>
+          <span><i class="urlmap__key urlmap__key--b"></i>název souboru i s koncovkou</span>
+        </p>
+      </div>
+      <p>Když obrázek do žádné podsložky nedáváte, smažte z cesty i podsložku a lomítko za ní:</p>
+      <div class="urlmap">
+        <p class="urlmap__line"><span class="urlmap__fix">/user/documents/upload/hp-redesign/</span><span class="urlmap__b">kategorie-6.jpg</span></p>
+      </div>
+      <p>Jestli jste cestu napsali správně, poznáte hned v náhledu vpravo. Když se obrázek nezobrazí, bývá to překlep v názvu, zapomenutá podsložka nebo špatná koncovka: <b>.jpg</b> není totéž co <b>.png</b>.</p>
 
       <h3>Co editor hlídá</h3>
       <p>Záložka Kontrola projde obsah ještě před vložením zpět. Hlásí chybějící a duplicitní alt popisky, prázdné cesty k obrázkům, odkazy bez lomítka na začátku nebo na konci, nečíselná ID widgetů a kotvy záložek, které se opakují.</p>
