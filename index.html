@@ -71,18 +71,18 @@
   /* ---------- start screen ---------- */
   .start{flex:1;min-height:0;overflow:auto;display:flex;align-items:flex-start;
     justify-content:center;padding:56px 24px}
-  .start__card{width:min(720px,100%)}
+  .start__card{width:min(840px,100%)}
   .start__eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
     text-transform:uppercase;color:var(--muted);margin:0 0 10px}
   .start__title{font-family:var(--serif);font-size:32px;line-height:1.2;margin:0 0 10px;font-weight:600}
   .start__sub{font-size:14.5px;color:#4A463E;margin:0 0 22px;max-width:60ch}
-  .start textarea{width:100%;min-height:300px;border:1px solid var(--rule);border-radius:5px;
+  .start textarea{width:100%;min-height:230px;border:1px solid var(--rule);border-radius:5px;
     padding:14px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.55;
     background:var(--panel);resize:vertical}
   .start textarea:focus{border-color:var(--ink)}
   .start__msg{font-size:13px;color:var(--pink-ink);min-height:20px;margin-top:10px}
   .start__actions{display:flex;gap:10px;align-items:center}
-  .start__steps{margin:0 0 22px;padding:0;list-style:none;counter-reset:s;max-width:62ch}
+  .start__steps{margin:0 0 16px;padding:0;list-style:none;counter-reset:s;max-width:62ch}
   .start__steps li{counter-increment:s;position:relative;padding-left:30px;margin-bottom:7px;
     font-size:14px;color:#3A362E}
   .start__steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:19px;height:19px;
@@ -119,6 +119,8 @@
   .shot--wide{flex:1 1 100%}
   .shot figcaption{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--muted);
     margin-top:7px}
+  .shots--start{gap:14px;margin:0 0 20px}
+  .shots--start .shot img{max-height:190px;width:auto}
   .modal--wide{width:min(860px,100%)}
 
   /* ---------- missing sections notice ---------- */
@@ -264,10 +266,20 @@
       <h1 class="start__title">Vložte aktuální HTML homepage</h1>
       <p class="start__sub">Editor začíná vždy tím, co je právě na webu, vlastní obsah si nedrží.</p>
       <ol class="start__steps">
-        <li>V administraci jděte do <b>Vzhled a obsah</b> → <b>Titulní strana</b> → <b>Nástroje</b> → <b>Zdrojový kód</b>.</li>
-        <li>Zkopírujte celý kód, úplně všechno.</li>
-        <li>Vložte ho sem dolů a dejte Načíst obsah.</li>
+        <li>V Shoptetu jděte do <b>Vzhled a obsah</b> → <b>Titulní strana</b>.</li>
+        <li>Nahoře v liště otevřete <b>Nástroje</b> → <b>Zdrojový kód</b>.</li>
+        <li>Zkopírujte celý kód, úplně všechno, a vložte ho sem dolů.</li>
       </ol>
+      <div class="shots shots--start">
+        <figure class="shot">
+          <img src="navod/shoptet-1-titulni-strana.png" alt="Levé menu Shoptetu s rozbalenou položkou Vzhled a obsah a vybranou Titulní stranou" loading="lazy" />
+          <figcaption>1. Vzhled a obsah → Titulní strana</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="navod/shoptet-2-zdrojovy-kod.png" alt="Rozbalená nabídka Nástroje s položkou Zdrojový kód" loading="lazy" />
+          <figcaption>2. Nástroje → Zdrojový kód</figcaption>
+        </figure>
+      </div>
       <textarea id="startIn" placeholder="Sem vložte celý zdrojový kód…" spellcheck="false"></textarea>
       <div class="start__msg" id="startMsg"></div>
       <div class="start__actions">
