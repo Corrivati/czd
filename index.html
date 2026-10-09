@@ -65,6 +65,30 @@
   .btn--tiny:disabled{opacity:.3;cursor:default;border-color:var(--rule)}
   .btn--danger:hover{color:var(--pink-ink);border-color:var(--pink-ink)}
 
+  [hidden]{display:none !important}
+  .topactions{display:flex;gap:10px;flex-wrap:wrap}
+
+  /* ---------- start screen ---------- */
+  .start{flex:1;min-height:0;overflow:auto;display:flex;align-items:flex-start;
+    justify-content:center;padding:56px 24px}
+  .start__card{width:min(720px,100%)}
+  .start__eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+  .start__title{font-family:var(--serif);font-size:32px;line-height:1.2;margin:0 0 10px;font-weight:600}
+  .start__sub{font-size:14.5px;color:#4A463E;margin:0 0 22px;max-width:60ch}
+  .start textarea{width:100%;min-height:300px;border:1px solid var(--rule);border-radius:5px;
+    padding:14px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.55;
+    background:var(--panel);resize:vertical}
+  .start textarea:focus{border-color:var(--ink)}
+  .start__msg{font-size:13px;color:var(--pink-ink);min-height:20px;margin-top:10px}
+  .start__actions{display:flex;gap:10px;align-items:center}
+
+  /* ---------- missing sections notice ---------- */
+  .notice{margin:16px 20px 0;padding:12px 14px;border-radius:4px;background:var(--yellow);
+    color:var(--yellow-ink);font-size:12.5px;line-height:1.5}
+  .notice strong{display:block;font-size:12.5px;margin-bottom:2px}
+  .notice p{margin:6px 0 0}
+
   /* ---------- layout ---------- */
   .work{display:grid;grid-template-columns:minmax(370px,450px) 1fr;flex:1;min-height:0}
   .form{overflow-y:auto;background:var(--panel);border-right:1px solid var(--rule);padding-bottom:70px}
@@ -117,6 +141,7 @@
   .item__name em{font-style:normal;color:var(--muted);font-weight:400;margin-left:9px;font-size:11.5px}
   .item__no{font-family:var(--mono);font-size:10px;color:var(--muted);flex:none}
   .item__body{padding:12px 12px 2px}
+  .item[data-open="false"] .item__body{display:none}
   .rowtools{display:flex;gap:4px;flex:none}
   .adder{margin-top:2px}
   .repeat-head{display:flex;align-items:center;justify-content:space-between;margin:16px 0 7px}
@@ -187,17 +212,29 @@
   <header class="topbar">
     <span class="wordmark">Czech<i></i>Design</span>
     <span class="toolname">Editor homepage</span>
-    <button class="btn" id="btnImportHTML">Načíst aktuální HTML</button>
-    <button class="btn btn--ghost" id="btnLoad">Načíst JSON</button>
-    <button class="btn btn--ghost" id="btnSave">Uložit JSON</button>
-    <button class="btn btn--ghost" id="btnReset">Vrátit původní</button>
-    <button class="btn" id="btnDownload">Stáhnout HTML</button>
-    <button class="btn btn--primary" id="btnCopy">Kopírovat HTML</button>
-    <input type="file" id="fileJson" accept="application/json,.json" hidden />
+    <span id="topActions" class="topactions" hidden>
+      <button class="btn" id="btnImportHTML">Načíst jiné HTML</button>
+      <button class="btn" id="btnDownload">Stáhnout HTML</button>
+      <button class="btn btn--primary" id="btnCopy">Kopírovat HTML</button>
+    </span>
     <input type="file" id="fileHtml" accept="text/html,.html,.htm,.txt" hidden />
   </header>
 
-  <div class="work">
+  <div class="start" id="start">
+    <div class="start__card">
+      <p class="start__eyebrow">Krok 1 ze 2</p>
+      <h1 class="start__title">Vložte aktuální HTML homepage</h1>
+      <p class="start__sub">Editor začíná vždy tím, co je právě na webu. Zkopírujte HTML homepage z administrace, vložte ho sem a všechna pole se z něj předvyplní.</p>
+      <textarea id="startIn" placeholder="Sem vložte HTML…" spellcheck="false"></textarea>
+      <div class="start__msg" id="startMsg"></div>
+      <div class="start__actions">
+        <button class="btn" id="btnStartFile">Vybrat soubor…</button>
+        <button class="btn btn--primary" id="btnStartParse">Načíst obsah</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="work" id="work" hidden>
     <aside class="view" style="border-right:1px solid var(--rule);background:var(--panel)">
       <div class="basebar">
         <label for="baseUrl">Obrázky v náhledu z</label>
@@ -224,7 +261,7 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal__head">
       <h2 class="modal__title" id="modalTitle">Načíst aktuální HTML</h2>
-      <p class="modal__sub">Zkopírujte HTML homepage z administrace a vložte ho sem. Nástroj z něj vyčte texty, obrázky, odkazy i ID widgetů a předvyplní všechna pole. Sekce, které v kódu nenajde, nechá beze změny.</p>
+      <p class="modal__sub">Zkopírujte HTML homepage z administrace a vložte ho sem. Nástroj z něj vyčte texty, obrázky, odkazy i ID widgetů a předvyplní všechna pole. Nahradí tím veškerý současný obsah editoru, takže vkládejte celou homepage, ne jen výřez.</p>
     </div>
     <div class="modal__body">
       <textarea id="htmlIn" placeholder="Sem vložte HTML…" spellcheck="false"></textarea>
@@ -245,94 +282,25 @@
 "use strict";
 
 /* =========================================================
-   1. VÝCHOZÍ OBSAH
+   1. STAV — editor startuje prázdný, obsah přichází z HTML
    ========================================================= */
-const DEFAULTS = {
-  intro: {
-    text: "Největší výběr českého designu na jednom místě. Czechdesign shop přináší kurátorský výběr produktů od lokálních designérů — od šperků po nábytek."
-  },
-  catTop: {
-    title: "Oblíbené kategorie",
-    items: [
-      {image:"/user/documents/upload/hp-redesign/kategorie-1.jpg", alt:"Zlaté náušnice — kategorie Šperky", href:"/zlate-sperky/", name:"Zlaté šperky", cta:"Zobrazit vše"},
-      {image:"/user/documents/upload/hp-redesign/kategorie-2.jpg", alt:"Keramický šálek — kategorie Keramika", href:"/hrnky-a-pohary/", name:"Hrnky a poháry", cta:"Zobrazit vše"},
-      {image:"/user/documents/upload/hp-redesign/kategorie-3.jpg", alt:"Dvě dívky s kšiltovkami — kategorie Móda", href:"/moda-a-doplnky/", name:"Módní doplňky", cta:"Zobrazit vše"},
-      {image:"/user/documents/upload/hp-redesign/kategorie-4.jpg", alt:"Barevný kuchyňský ručník — kategorie Textil", href:"/kuchynsky-textil/", name:"Kuchyňský textil", cta:"Zobrazit vše"},
-      {image:"/user/documents/upload/hp-redesign/kategorie-5.jpg", alt:"Kniha Rare Places — kategorie Knihy", href:"/knihy/", name:"Knihy", cta:"Zobrazit vše"}
-    ]
-  },
-  inspiration: {
-    navLabel:"Inspirace Czechdesign", navHref:"/blog/",
-    tabs:[
-      {anchor:"button1", tabLabel:"Pravidla stolování",
-       image:"/user/documents/upload/hp-redesign/inspiration/stolovani.jpg",
-       alt:"Prostřený stůl — pravidla stolování",
-       title:"Jak na správné stolování: etiketa, příbory a atmosféra",
-       text:"Správné stolování není o přísných pravidlech, ale o kultivovanosti, klidu a pozornosti k detailu. V článku se dozvíte, jak prostřít stůl pro běžné i sváteční příležitosti, jak správně postavit a odkládat příbory, jak se chovat u stolu i proč záleží na tom, z čeho jíme. Praktické tipy české etikety stolování doplňuje pohled na design, tradici a atmosféru, která z obyčejného jídla dělá příjemný rituál.",
-       linkHref:"/blog/pravidla-spravneho-stolovani/", linkLabel:"Přečíst článek →", widgetId:"45208"},
-      {anchor:"button2", tabLabel:"Prsten a tradice",
-       image:"/user/documents/upload/hp-redesign/inspiration/prsteny.jpg",
-       alt:"Snubní a zásnubní prsteny na ruce",
-       title:"Kde a jak se nosí zásnubní a snubní prsten: Tradice i současnost",
-       text:"Kde se nosí zásnubní prsten, kam patří snubní prsten a jak je kombinovat? Možná si tuhle otázku právě kladete – nejste sami. Nošení prstenů se liší podle tradic, kultury i osobního stylu. V tomto článku se podíváme na to, kde se nosí zásnubní a snubní prsten, co říká tradice a jak k tomu přistupují moderní páry.",
-       linkHref:"/blog/kde-se-nosi-zasnubni-a-snubni-prsten/", linkLabel:"Přečíst článek →", widgetId:"45209"}
-    ]
-  },
-  catBottom: {
-    title:"Kampaně",
-    items:[
-      {image:"/user/documents/upload/hp-redesign/campaigns/sperky.jpg", alt:"Kampaň na šperky", href:"/sperky-2/", name:"Šperky", cta:"Zobrazit vše"},
-      {image:"/user/documents/upload/hp-redesign/campaigns/firemni.jpg", alt:"Firemní dárky pro partnery", href:"/firemni-darky/", name:"Firemní dárky", cta:"Zobrazit vše"},
-      {image:"/user/documents/upload/hp-redesign/campaigns/slevy.jpg", alt:"Zlevněné produkty českých designérů", href:"/slevy-2/", name:"Slevy %", cta:"Zobrazit vše"}
-    ]
-  },
-  rings: {
-    navHref:"/snoubeni/",
-    navLine1:"Snubní a zásnubní prsteny",
-    navLine2:"od českých designérů",
-    description:"Projekt Snoubení na Czechdesignu nabízí snubní a zásnubní prsteny od českých designérů.\nKurátorský výběr spojuje současný design, kvalitní řemeslo a osobní příběhy — pro chvíle, na kterých záleží.",
-    tabs:[
-      {anchor:"marriage", tabLabel:"Snubní prsteny",
-       image:"/user/documents/upload/hp-redesign/prsteny-1.jpg",
-       alt:"Nevěsta a ženich — snubní prsteny od českých designérů", widgetId:"45287"},
-      {anchor:"engagement", tabLabel:"Zásnubní prsteny",
-       image:"/user/documents/upload/hp-redesign/prsteny-2.jpg",
-       alt:"Zásnubní prsteny od českých designérů", widgetId:"45212"}
-    ]
-  },
-  designers: {
-    heading:"Designéři a značky", headingHref:"/znacka/",
-    items:[
-      {href:"/znacka/jiri-pelcl/", image:"/user/documents/upload/hp-redesign/designers/pelcl.png", name:"Jiří Pelcl"},
-      {href:"/znacka/anezka-juhova/", image:"/user/documents/upload/hp-redesign/designers/juhova.png", name:"Anežka Juhová"},
-      {href:"/znacka/eliska-lhotska/", image:"/user/documents/upload/hp-redesign/designers/lhotska.png", name:"Eliška Lhotská"},
-      {href:"/znacka/janja-prokic-czechdesign-jewellry/", image:"/user/documents/upload/hp-redesign/designers/prokic.png", name:"Janja Prokic"},
-      {href:"/znacka/dick-wolf/", image:"/user/documents/upload/hp-redesign/designers/wolf.png", name:"Dick Wolf"},
-      {href:"/znacka/klara-marie-bliss/", image:"/user/documents/upload/hp-redesign/designers/bliss.png", name:"Klára Marie Bliss"},
-      {href:"/znacka/ondrej-stara/", image:"/user/documents/upload/hp-redesign/designers/stara.png", name:"Ondřej Stára"},
-      {href:"/znacka/zdenek-vacek/", image:"/user/documents/upload/hp-redesign/designers/vacek.png", name:"Zdeněk Vacek"},
-      {href:"/znacka/maria-kobelova/", image:"/user/documents/upload/hp-redesign/designers/kobelova.png", name:"Marie Kobelová"},
-      {href:"/znacka/ourte/", image:"/user/documents/upload/hp-redesign/designers/ourte.png", name:"Ourte"}
-    ]
-  },
-  about: {
-    heading:"O nás", headingHref:"/o-nas/",
-    body:"Jsme víc než jen obchod s krásnými věcmi — jsme součástí příběhu českého designu. Czechdesign Shop, který založila a vede Jana Vinšová, čerpá z více než 22 let zkušeností stejnojmenné organizace, stojící za nejčtenějším magazínem i řadou designérských soutěží. Vybíráme pro vás produkty, které mají smysl, kvalitu a autorský rukopis. Zastavte se za námi v centru Prahy nebo navštivte náš online shop.",
-    shopName:"Czechdesign Shop",
-    street:"Myslíkova 5,",
-    streetHref:"https://www.google.com/maps?cid=11773290554397702805&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYASAA&hl=cs-CZ&source=embed",
-    city:"Praha 1, 110 00",
-    hours:[{day:"Po–So", time:"10—19"},{day:"Neděle", time:"10—18"}],
-    ctaLabel:"Detail kamenné prodejny →",
-    ctaHref:"/navstivte-nas-kamenny-obchod/",
-    ctaAria:"Detail kamenné prodejny",
-    photo:"/user/documents/upload/foto_dita_jana.jpg?v=1",
-    photoAlt:"Dita Hejnová a Jana Vinšová před Czechdesign Shopem v Praze",
-    caption:"Dita Hejnová (manažerka shopu)\nJana Vinšová (ředitelka organizace CZD)"
-  }
-};
+const SECTIONS = [
+  ["intro",       "Úvodní text",        ".main-intro"],
+  ["catTop",      "Oblíbené kategorie", ".categories.top"],
+  ["inspiration", "Inspirace",          ".fv-inspiration"],
+  ["catBottom",   "Kampaně",            ".categories.bottom"],
+  ["rings",       "Snoubení — prsteny", ".rings-section"],
+  ["designers",   "Designéři a značky", ".designers-section"],
+  ["about",       "O nás",              ".about"]
+];
 
-let data = clone(DEFAULTS);
+function emptyData(){
+  const o = {};
+  SECTIONS.forEach(function(s){ o[s[0]] = null; });
+  return o;
+}
+
+let data = null;
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 
 /* =========================================================
@@ -505,17 +473,20 @@ hours,
 }
 
 function buildHTML(){
-  return [
-    ['<section class="main-intro container">',
-     '  <div class="title">' + multiline(data.intro.text) + '</div>',
-     '</section>'].join("\n"),
-    categoriesHTML(data.catTop, "top"),
-    inspirationHTML(data.inspiration),
-    categoriesHTML(data.catBottom, "bottom"),
-    ringsHTML(data.rings),
-    designersHTML(data.designers),
-    aboutHTML(data.about)
-  ].join("\n\n") + "\n";
+  if(!data) return "";
+  const parts = [];
+  if(data.intro) parts.push([
+    '<section class="main-intro container">',
+    '  <div class="title">' + multiline(data.intro.text) + '</div>',
+    '</section>'
+  ].join("\n"));
+  if(data.catTop)      parts.push(categoriesHTML(data.catTop, "top"));
+  if(data.inspiration) parts.push(inspirationHTML(data.inspiration));
+  if(data.catBottom)   parts.push(categoriesHTML(data.catBottom, "bottom"));
+  if(data.rings)       parts.push(ringsHTML(data.rings));
+  if(data.designers)   parts.push(designersHTML(data.designers));
+  if(data.about)       parts.push(aboutHTML(data.about));
+  return parts.length ? parts.join("\n\n") + "\n" : "";
 }
 
 /* =========================================================
@@ -523,7 +494,7 @@ function buildHTML(){
    ========================================================= */
 function parseHTML(src){
   const doc = new DOMParser().parseFromString(src, "text/html");
-  const next = clone(data);
+  const next = emptyData();
   const report = [];
 
   const one = function(sel){ return doc.querySelector("section" + sel) || doc.querySelector(sel); };
@@ -567,7 +538,7 @@ function parseHTML(src){
 
   /* úvod */
   const intro = doc.querySelector(".main-intro .title") || doc.querySelector(".main-intro");
-  if(intro){ next.intro.text = lines(intro); report.push("úvodní text"); }
+  if(intro){ next.intro = {text: lines(intro)}; report.push("úvodní text"); }
 
   /* kategorie + kampaně */
   const allCats = Array.prototype.filter.call(doc.querySelectorAll(".categories"), function(s){
@@ -579,7 +550,7 @@ function parseHTML(src){
     if(!t[0]) return;
     const items = cardsFrom(t[0]);
     if(!items.length) return;
-    next[t[1]] = {title: txt(t[0].querySelector(".categories__title")) || next[t[1]].title, items: items};
+    next[t[1]] = {title: txt(t[0].querySelector(".categories__title")), items: items};
     report.push(items.length + "× " + t[2]);
   });
 
@@ -638,7 +609,7 @@ function parseHTML(src){
       return {href: attr(a,"href"), image: attr(img,"src"), name: txt(li.querySelector(".designer-card__name"))};
     });
     if(items.length){
-      next.designers = {heading: txt(h) || next.designers.heading, headingHref: attr(h,"href"), items: items};
+      next.designers = {heading: txt(h), headingHref: attr(h,"href"), items: items};
       report.push(items.length + "× designér");
     }
   }
@@ -658,14 +629,14 @@ function parseHTML(src){
       return {day: w.slice(0,-1).join(" "), time: w[w.length-1] || ""};
     });
     next.about = {
-      heading: txt(h) || next.about.heading,
+      heading: txt(h),
       headingHref: attr(h,"href"),
       body: lines(ab.querySelector(".about__body")),
       shopName: txt(ab.querySelector(".about__shop-name")),
       street: txt(street), streetHref: attr(street,"href"),
       city: txt(ab.querySelector(".about__address-city")),
-      hours: hours.length ? hours : next.about.hours,
-      ctaLabel: txt(cta) || next.about.ctaLabel,
+      hours: hours,
+      ctaLabel: txt(cta),
       ctaHref: attr(cta,"href"),
       ctaAria: attr(cta,"aria-label") || txt(cta),
       photo: attr(photo,"src"), photoAlt: attr(photo,"alt"),
@@ -683,6 +654,7 @@ function parseHTML(src){
    ========================================================= */
 function runChecks(){
   const out = [];
+  if(!data) return out;
   const add = function(level, where, msg){ out.push({level:level, where:where, msg:msg}); };
   const seenAlt = {};
 
@@ -706,9 +678,10 @@ function runChecks(){
     if(!String(v || "").trim()) add("err", where, "Chybí " + label + ".");
   };
 
-  checkText("Úvodní text", data.intro.text, "text");
+  if(data.intro) checkText("Úvodní text", data.intro.text, "text");
 
   [["Oblíbené kategorie", data.catTop],["Kampaně", data.catBottom]].forEach(function(p){
+    if(!p[1]) return;
     checkText(p[0], p[1].title, "nadpis sekce");
     p[1].items.forEach(function(c, i){
       const w = p[0] + " — karta " + (i+1);
@@ -718,7 +691,7 @@ function runChecks(){
   });
 
   const anchors = {};
-  data.inspiration.tabs.forEach(function(t, i){
+  if(data.inspiration) data.inspiration.tabs.forEach(function(t, i){
     const w = "Inspirace — záložka " + (i+1);
     checkSrc(w, t.image); noteAlt(w, t.alt);
     checkText(w, t.title, "titulek"); checkText(w, t.text, "perex");
@@ -730,7 +703,7 @@ function runChecks(){
   });
 
   const ra = {};
-  data.rings.tabs.forEach(function(t, i){
+  if(data.rings) data.rings.tabs.forEach(function(t, i){
     const w = "Prsteny — záložka " + (i+1);
     checkSrc(w, t.image); noteAlt(w, t.alt);
     if(!/^\d+$/.test(String(t.widgetId || ""))) add("err", w, "ID widgetu musí být číslo.");
@@ -738,10 +711,10 @@ function runChecks(){
     else if(ra[t.anchor]) add("err", w, "Kotva „" + t.anchor + "“ se opakuje.");
     else ra[t.anchor] = 1;
   });
-  checkHref("Prsteny", data.rings.navHref, true);
+  if(data.rings) checkHref("Prsteny", data.rings.navHref, true);
 
   const names = {};
-  data.designers.items.forEach(function(d, i){
+  if(data.designers) data.designers.items.forEach(function(d, i){
     const w = "Designéři — " + (d.name || ("položka " + (i+1)));
     checkSrc(w, d.image); checkHref(w, d.href, true); checkText(w, d.name, "jméno");
     const k = String(d.name || "").trim().toLowerCase();
@@ -749,11 +722,13 @@ function runChecks(){
     names[k] = 1;
   });
 
-  checkText("O nás", data.about.body, "text");
-  checkSrc("O nás — fotografie", data.about.photo);
-  noteAlt("O nás — fotografie", data.about.photoAlt);
-  checkHref("O nás — mapa", data.about.streetHref, false);
-  checkHref("O nás — tlačítko", data.about.ctaHref, true);
+  if(data.about){
+    checkText("O nás", data.about.body, "text");
+    checkSrc("O nás — fotografie", data.about.photo);
+    noteAlt("O nás — fotografie", data.about.photoAlt);
+    checkHref("O nás — mapa", data.about.streetHref, false);
+    checkHref("O nás — tlačítko", data.about.ctaHref, true);
+  }
 
   return out;
 }
@@ -1017,21 +992,38 @@ function buildForm(){
   const host = document.getElementById("form");
   host.innerHTML = "";
   labelRegistry = [];
+  if(!data) return;
 
-  host.appendChild(section("intro", "01", "Úvodní text", ".main-intro", function(b){
+  const missing = SECTIONS.filter(function(s){ return !data[s[0]]; });
+  if(missing.length){
+    const n = el("div", "notice");
+    n.appendChild(el("strong", null, "V načteném HTML nebyly tyto sekce:"));
+    n.appendChild(document.createTextNode(missing.map(function(s){ return s[1]; }).join(", ")));
+    n.appendChild(el("p", null, "Do vygenerovaného kódu se nedostanou. Pokud tam patří, načtěte HTML znovu i s nimi."));
+    host.appendChild(n);
+  }
+
+  let n = 0;
+  const add = function(key, title, cssName, build){
+    if(!data[key]) return;
+    n++;
+    host.appendChild(section(key, String(n).padStart(2, "0"), title, cssName, build));
+  };
+
+  add("intro", "Úvodní text", ".main-intro", function(b){
     b.appendChild(field("Text", data.intro, "text", {area:true, rows:4, hint:"Nový řádek se převede na <br />"}));
-  }));
+  });
 
-  host.appendChild(section("catTop", "02", "Oblíbené kategorie", ".categories.top", function(b){
+  add("catTop", "Oblíbené kategorie", ".categories.top", function(b){
     b.appendChild(field("Nadpis sekce", data.catTop, "title"));
     repeater(b, data.catTop.items, {
       groupLabel:"Karty kategorií", thumbKey:"image",
       label: function(c){ return [c.name, c.href]; },
       fields: cardFields, blank: BLANK_CARD, addLabel:"+ Přidat kategorii"
     });
-  }));
+  });
 
-  host.appendChild(section("inspiration", "03", "Inspirace", ".fv-inspiration", function(b){
+  add("inspiration", "Inspirace", ".fv-inspiration", function(b){
     b.appendChild(pair(
       field("Nadpis sekce", data.inspiration, "navLabel"),
       field("Odkaz nadpisu", data.inspiration, "navHref", {mono:true})
@@ -1057,18 +1049,18 @@ function buildForm(){
         h.appendChild(field("ID widgetu", t, "widgetId", {mono:true, hint:"Jen číslo, doplní se na obě místa"}));
       }
     });
-  }));
+  });
 
-  host.appendChild(section("catBottom", "04", "Kampaně", ".categories.bottom", function(b){
+  add("catBottom", "Kampaně", ".categories.bottom", function(b){
     b.appendChild(field("Nadpis sekce", data.catBottom, "title"));
     repeater(b, data.catBottom.items, {
       groupLabel:"Karty kampaní", thumbKey:"image",
       label: function(c){ return [c.name, c.href]; },
       fields: cardFields, blank: BLANK_CARD, addLabel:"+ Přidat kampaň"
     });
-  }));
+  });
 
-  host.appendChild(section("rings", "05", "Snoubení — prsteny", ".rings-section", function(b){
+  add("rings", "Snoubení — prsteny", ".rings-section", function(b){
     b.appendChild(pair(
       field("Nadpis, 1. řádek", data.rings, "navLine1"),
       field("Nadpis, 2. řádek", data.rings, "navLine2")
@@ -1090,9 +1082,9 @@ function buildForm(){
         h.appendChild(field("ID widgetu", t, "widgetId", {mono:true}));
       }
     });
-  }));
+  });
 
-  host.appendChild(section("designers", "06", "Designéři a značky", ".designers-section", function(b){
+  add("designers", "Designéři a značky", ".designers-section", function(b){
     b.appendChild(pair(
       field("Nadpis", data.designers, "heading"),
       field("Odkaz nadpisu", data.designers, "headingHref", {mono:true})
@@ -1107,9 +1099,9 @@ function buildForm(){
         h.appendChild(field("Portrét", d, "image", {mono:true}));
       }
     });
-  }));
+  });
 
-  host.appendChild(section("about", "07", "O nás", ".about", function(b){
+  add("about", "O nás", ".about", function(b){
     b.appendChild(pair(
       field("Nadpis", data.about, "heading"),
       field("Odkaz nadpisu", data.about, "headingHref", {mono:true})
@@ -1137,7 +1129,7 @@ function buildForm(){
     b.appendChild(field("Fotografie", data.about, "photo", {mono:true}));
     b.appendChild(field("Alt popisek fotografie", data.about, "photoAlt"));
     b.appendChild(field("Popiska pod fotografií", data.about, "caption", {area:true, rows:3}));
-  }));
+  });
 
   updateLabels();
 }
@@ -1155,6 +1147,12 @@ function refresh(){
 }
 
 function paint(){
+  const loaded = !!data;
+  document.getElementById("start").hidden = loaded;
+  document.getElementById("work").hidden = !loaded;
+  document.getElementById("topActions").hidden = !loaded;
+  if(!loaded) return;
+
   currentHTML = buildHTML();
   document.getElementById("codeBox").textContent = currentHTML;
   document.getElementById("frame").srcdoc = previewDoc(currentHTML);
@@ -1235,36 +1233,50 @@ document.getElementById("btnDownload").onclick = function(){
   download("homepage.html", currentHTML, "text/html;charset=utf-8");
   toast("Soubor homepage.html stažen");
 };
-document.getElementById("btnSave").onclick = function(){
-  download("homepage-obsah.json", JSON.stringify(data, null, 2), "application/json");
-  toast("Obsah uložen jako JSON");
-};
-document.getElementById("btnLoad").onclick = function(){ document.getElementById("fileJson").click(); };
-document.getElementById("fileJson").onchange = function(e){
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const r = new FileReader();
-  r.onload = function(){
-    try {
-      const p = JSON.parse(r.result);
-      if(!p || !p.intro || !p.catTop) throw new Error("bad");
-      data = p; rebuild(); toast("Obsah načten ze souboru " + f.name);
-    } catch(err){ toast("Soubor se nepodařilo načíst. Čeká se JSON z tlačítka Uložit JSON."); }
-  };
-  r.readAsText(f);
-  e.target.value = "";
-};
-document.getElementById("btnReset").onclick = function(){
-  if(confirm("Vrátit všechna pole na původní obsah? Neuložené změny se ztratí.")){
-    data = clone(DEFAULTS); rebuild(); toast("Obsah vrácen do původního stavu");
+/* --- načtení HTML: úvodní obrazovka i opakovaný import --- */
+const overlay   = document.getElementById("overlay");
+const htmlIn    = document.getElementById("htmlIn");
+const modalMsg  = document.getElementById("modalMsg");
+const startIn   = document.getElementById("startIn");
+const startMsg  = document.getElementById("startMsg");
+
+function importFrom(src, msgEl){
+  const text = String(src || "").trim();
+  if(!text){ msgEl.textContent = "Nejdřív vložte HTML."; return false; }
+  let res;
+  try { res = parseHTML(text); }
+  catch(err){ msgEl.textContent = "HTML se nepodařilo zpracovat: " + err.message; return false; }
+  if(!res.ok){
+    msgEl.textContent = "V kódu nebyla nalezena žádná známá sekce. Zkontrolujte, že jde o HTML homepage s třídami jako main-intro, categories nebo about.";
+    return false;
   }
+  msgEl.textContent = "";
+  data = res.next;
+  rebuild();
+  toast("Načteno: " + res.report.join(", "));
+  return true;
+}
+
+function readFileInto(target, msgEl){
+  const input = document.getElementById("fileHtml");
+  input.onchange = function(e){
+    const f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(!f) return;
+    const r = new FileReader();
+    r.onload = function(){ target.value = r.result; msgEl.textContent = ""; };
+    r.readAsText(f);
+  };
+  input.click();
+}
+
+/* úvodní obrazovka */
+document.getElementById("btnStartFile").onclick = function(){ readFileInto(startIn, startMsg); };
+document.getElementById("btnStartParse").onclick = function(){
+  if(importFrom(startIn.value, startMsg)) startIn.value = "";
 };
 
-/* --- načtení aktuálního HTML --- */
-const overlay = document.getElementById("overlay");
-const htmlIn = document.getElementById("htmlIn");
-const modalMsg = document.getElementById("modalMsg");
-
+/* opakovaný import */
 function openModal(){
   modalMsg.textContent = "";
   overlay.dataset.open = "true";
@@ -1279,34 +1291,14 @@ document.addEventListener("keydown", function(e){
   if(e.key === "Escape" && overlay.dataset.open === "true") closeModal();
 });
 
-document.getElementById("btnPickHtml").onclick = function(){ document.getElementById("fileHtml").click(); };
-document.getElementById("fileHtml").onchange = function(e){
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const r = new FileReader();
-  r.onload = function(){ htmlIn.value = r.result; modalMsg.textContent = ""; };
-  r.readAsText(f);
-  e.target.value = "";
-};
-
+document.getElementById("btnPickHtml").onclick = function(){ readFileInto(htmlIn, modalMsg); };
 document.getElementById("btnParse").onclick = function(){
-  const src = htmlIn.value.trim();
-  if(!src){ modalMsg.textContent = "Nejdřív vložte HTML."; return; }
-  let res;
-  try { res = parseHTML(src); }
-  catch(err){ modalMsg.textContent = "HTML se nepodařilo zpracovat: " + err.message; return; }
-  if(!res.ok){
-    modalMsg.textContent = "V kódu nebyla nalezena žádná známá sekce. Zkontrolujte, že jde o HTML homepage s třídami jako main-intro, categories nebo about.";
-    return;
-  }
-  data = res.next;
-  htmlIn.value = "";
-  closeModal();
-  rebuild();
-  toast("Načteno: " + res.report.join(", "));
+  if(!htmlIn.value.trim()){ modalMsg.textContent = "Nejdřív vložte HTML."; return; }
+  if(data && !confirm("Načtení nahradí veškerý obsah v editoru. Neuložené úpravy se ztratí. Pokračovat?")) return;
+  if(importFrom(htmlIn.value, modalMsg)){ htmlIn.value = ""; closeModal(); }
 };
 
-rebuild();
+paint();
 </script>
 </body>
 </html>

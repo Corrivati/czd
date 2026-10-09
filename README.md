@@ -7,28 +7,29 @@ hotové HTML k vložení do administrace.
 
 ## Co umí
 
-- Všechny sekce homepage: úvodní text, Oblíbené kategorie, Inspirace,
-  Kampaně, Snoubení, Designéři a značky, O nás
-- **Načíst aktuální HTML** — vložíte kód z administrace a nástroj z něj
-  předvyplní všechna pole. Sekce, které v kódu nenajde, nechá beze změny
+- Začíná se vždy vložením aktuálního HTML z administrace. Editor nemá
+  žádný vlastní výchozí obsah, pracuje jen s tím, co mu dáte
+- Sekce: úvodní text, Oblíbené kategorie, Inspirace, Kampaně, Snoubení,
+  Designéři a značky, O nás. Vypíše se jen to, co bylo ve vloženém kódu,
+  chybějící sekce nástroj vypíše jako upozornění
 - Živý náhled ve stylu webu, záložky v náhledu fungují
 - Kontrola před exportem: chybějící a duplicitní alt popisky, prázdné
   cesty k obrázkům, odkazy bez lomítka, nečíselná ID widgetů, kolidující
   kotvy
 - Karty a designéři jsou sbalení, dají se přidávat, mazat, duplikovat
   a přesouvat
-- Export: Kopírovat HTML, Stáhnout HTML, Uložit / Načíst JSON
+- Export: Kopírovat HTML, Stáhnout HTML
 
 ## Práce s obsahem
 
-Rozpracovaný obsah se nikam neukládá sám. Před zavřením karty použijte
-**Uložit JSON** a příště **Načíst JSON**. Nebo si vždy načtěte aktuální
-HTML z administrace a pracujte z něj.
+Rozpracovaný obsah se nikam neukládá. Zavřením karty se ztratí, takže
+hotový kód rovnou kopírujte do administrace. Příště zase začnete tím, že
+si načtete aktuální HTML.
 
 ## Úpravy
 
 Celý nástroj je jeden soubor `index.html` bez závislostí. Uvnitř je
-rozdělený na číslované sekce: výchozí obsah, generátor HTML, čtečka HTML,
+rozdělený na číslované sekce: stav, generátor HTML, čtečka HTML,
 kontrola, náhled, formulář, překreslení, akce.
 
 Po commitu do `main` se změna projeví na Pages do zhruba minuty.
