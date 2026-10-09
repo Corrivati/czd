@@ -93,6 +93,10 @@
     padding:10px;display:flex;align-items:center;justify-content:center;min-height:200px}
   .step__shot img{max-width:100%;max-height:200px;width:auto;height:auto;display:block}
   .step__shot svg{width:100%;height:auto;max-height:200px;display:block}
+  .start__note{margin:0 0 20px;padding:11px 15px;border-left:2px solid var(--ink);
+    background:var(--tile);border-radius:0 4px 4px 0;font-size:13px;line-height:1.55;
+    color:#3A362E;max-width:68ch}
+  .start__note b{font-weight:600;color:var(--ink)}
 
   .backups{margin-top:26px;border-top:1px solid var(--rule);padding-top:20px}
   .backups__title{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
@@ -310,6 +314,7 @@
           </div>
         </li>
       </ol>
+      <p class="start__note"><b>CZ a SK verzi dělejte zvlášť.</b> Česká a slovenská homepage jsou dvě samostatné stránky s vlastním zdrojovým kódem. Postup je u obou stejný, jen ho projdete dvakrát, pro každou verzi zvlášť.</p>
       <textarea id="startIn" placeholder="Sem vložte celý zdrojový kód…" spellcheck="false"></textarea>
       <div class="start__msg" id="startMsg"></div>
       <div class="start__actions">
@@ -408,6 +413,10 @@
           <figcaption>2. Nástroje → Zdrojový kód</figcaption>
         </figure>
       </div>
+
+      <h3>Česká a slovenská verze</h3>
+      <p class="guide__note">CZ a SK homepage jsou v administraci dvě samostatné stránky, každá má svůj vlastní zdrojový kód. Editor vždy pracuje jen s tou verzí, kterou jste do něj vložili.</p>
+      <p>Postup je u obou úplně stejný, jen ho projdete dvakrát: načíst kód jedné verze, upravit, vložit zpět, a teprve pak totéž s druhou. Výstup z jedné verze nikdy nevkládejte do druhé, liší se texty i odkazy.</p>
 
       <h3>Úprava obsahu</h3>
       <ul>
